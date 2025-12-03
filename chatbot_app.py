@@ -32,7 +32,7 @@ if "messages" not in st.session_state:
 
 # --- BƯỚC 4: Hiển thị Giao diện Streamlit ---
 
-st.title("🤖 Chatbot AI Gia Sư Ảo Lớp 8")
+st.title("🤖 Chatbot AI Gia Sư Ảo")
 st.caption("Đề tài Nghiên cứu Khoa học Kỹ thuật")
 
 # Hiển thị lịch sử trò chuyện
@@ -47,17 +47,19 @@ if prompt := st.chat_input("Hãy hỏi bài tập hoặc khái niệm Lớp 8 m�
     st.chat_message("user").write(prompt)
 
     # Gọi API để nhận phản hồi từ Chatbot
-    try:
-        with st.spinner("Gia sư đang suy nghĩ..."):
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo", # Có thể nâng cấp lên gpt-4
-                messages=st.session_state.messages
+  # ... (Khối if prompt)
+    try:
+        with st.spinner("Gia sư đang suy nghĩ..."):
+            response = client.models.generate_content(
+                # ... Lệnh gọi API
             )
-        
-        # Lấy phản hồi và hiển thị
-        msg = response.choices[0].message
+return response.text  # <--- Dòng gây lỗi (Dòng 57)
+        
+        # Lấy phản hồi và hiển thị
+        msg = response.choices[0].message # <--- Đây là code của OpenAI, không phải Gemini
+# ... (Khối except)
         st.session_state.messages.append(msg)
-        st.chat_message("assistant").write(msg.content)
+st.chat_message("assistant").write(msg.content)
         
     except Exception as e:
         st.error(f"Lỗi kết nối AI: {e}. Vui lòng kiểm tra Khóa API và kết nối mạng.")
@@ -65,4 +67,5 @@ if prompt := st.chat_input("Hãy hỏi bài tập hoặc khái niệm Lớp 8 m�
 # --- Nút Xóa Lịch sử (Để kiểm tra và bắt đầu phiên mới) ---
 if st.button("Bắt đầu Phiên Mới (Xóa lịch sử)"):
     st.session_state["messages"] = [{"role": "system", "content": SYSTEM_PROMPT}]
+
     st.rerun()
